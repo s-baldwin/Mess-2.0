@@ -297,9 +297,9 @@ std::string armSequentialVectorClobbers(const KernelConfig& config) {
     for (int reg = 0; reg < used_regs; ++reg) {
         if (isNeonPairMode(config.isa_mode)) {
             const int qreg = (reg * 2) % 32;
-            oss << ", \"q" << qreg << "\", \"q" << (qreg + 1) << "\"";
+            oss << ", \"v" << qreg << "\", \"v" << (qreg + 1) << "\"";
         } else {
-            oss << ", \"q" << reg << "\"";
+            oss << ", \"v" << reg << "\"";
         }
     }
     return oss.str();

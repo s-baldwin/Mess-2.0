@@ -45,8 +45,13 @@
 #ifdef __linux__
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
-#endif
 #include <time.h>
+#else
+/* macOS: no perf_event; fds stay -1 so these ioctls are never executed */
+#define PERF_EVENT_IOC_RESET   0
+#define PERF_EVENT_IOC_ENABLE  0
+#define PERF_EVENT_IOC_DISABLE 0
+#endif
 
 #ifndef ARRAY_ELEMS
 #pragma message "ARRAY_ELEMS not defined. Using the default value."

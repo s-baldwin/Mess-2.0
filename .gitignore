@@ -1,0 +1,7 @@
+*.o
+build/
+*.log
+src/traffic_gen/src/nop.c
+src/traffic_gen/src/generated_*.c
+src/traffic_gen/src/utils.c
+src/traffic_gen/build/

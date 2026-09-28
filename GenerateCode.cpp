@@ -696,11 +696,17 @@ int main(int argc, char* argv[]) {
             }
             const int trafficgen_compile_jobs = std::max(1, std::min(compile_jobs, num_cores));
             std::string build_cmd = "cd " + (root / "src/traffic_gen").string() + " && mkdir -p build && make -j" + std::to_string(trafficgen_compile_jobs) + " " + target_name +
+            #ifdef __APPLE__
+                                   " CFLAGS=\"" + arch_flags + " -Wall -DTrafficGen_ARRAY_SIZE=" + std::to_string(min_traffic_gen_size) + "\"" +
+                                   " LDFLAGS=\"-pthread\"" +
+#else
                                    " CFLAGS=\"" + arch_flags + " -Wall -fopenmp -DTrafficGen_ARRAY_SIZE=" + std::to_string(min_traffic_gen_size) + "\"" +
                                    " LDFLAGS=\"-pthread -lrt -fopenmp\"" +
-                                   (debug_mode ? "" : " >/dev/null 2>&1");
-            
-            int build_result = system(build_cmd.c_str());
+#endif
+				                                      (debug_mode ? "" : " >/dev/null 2>&1");
+
+
+		    int build_result = system(build_cmd.c_str());
             
             if (WIFEXITED(build_result) && WEXITSTATUS(build_result) == 0) {
                 std::string source_binary = (root / "src/traffic_gen" / target_name).string();

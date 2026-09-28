@@ -349,6 +349,10 @@ static bool try_detect_memory_freq(char* freq, int* channels) {
 }
 #endif
 
+#ifdef __APPLE__
+bool cpu_has_onpackage_hbm(const std::string&) { return false; }
+#endif
+
 #ifndef __APPLE__
 bool cpu_has_onpackage_hbm(const std::string& cpu_model) {
     std::string upper = cpu_model;
