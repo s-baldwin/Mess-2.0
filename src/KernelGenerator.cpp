@@ -524,6 +524,17 @@ std::string KernelGenerator::generate_all_multiseq_functions() {
     oss << "    }\n";
     oss << "}\n\n";
 
+        // macOS software bandwidth: bytes issued per loop iteration for each ratio (NEON path; no SVE on Apple)
+    oss << "void TrafficGen_get_rw_bytes_per_iter(int ratio, long long *rd, long long *wr)\n{\n";
+    oss << "    switch (ratio) {\n";
+    for (int r = 0; r <= 100; r += kernel_config_.ratio_granularity) {
+        int nr = (total_ops * r + 50) / 100;
+        int nw = total_ops - nr;
+        oss << "        case " << r << ": *rd = " << (long long)nr * bytes_per_op
+            << "; *wr = " << (long long)nw * bytes_per_op * stores_per_write << "; return;\n";
+    }
+    oss << "        default: *rd = 0; *wr = 0; return;\n";
+    oss << "    }\n}\n\n";
     oss << "void TrafficGen_copy_rw(double *a_array, double *b_array, ssize_t *array_size, int *pause, int rd_percentage)\n";
     oss << "{\n";
     oss << "    switch (rd_percentage) {\n";

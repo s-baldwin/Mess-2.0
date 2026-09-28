@@ -40,5 +40,6 @@ void print_usage(char *argv[], char* usage);
 int TrafficGen_get_ratio_granularity(void);
 void TrafficGen_copy_rw(double *a_array, double *b_array, ssize_t *array_size, int *pause, int rd_percentage);
 int TrafficGen_get_loop_increment(int ratio);
+void TrafficGen_get_rw_bytes_per_iter(int ratio, long long *rd, long long *wr);
 
 #endif

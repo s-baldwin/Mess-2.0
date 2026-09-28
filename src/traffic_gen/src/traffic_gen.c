@@ -41,6 +41,27 @@
 #include <fcntl.h>
 #include "utils.h"
 
+#ifdef __APPLE__
+#include <stdatomic.h>
+#include <sys/stat.h>
+typedef struct { _Atomic unsigned long long rd_bytes; _Atomic unsigned long long wr_bytes; } mess_sw_counter_t;
+static mess_sw_counter_t *mess_sw = NULL;
+static void mess_sw_counter_init(void) {
+    const char *dir = getenv("MESS_SW_BW_DIR");
+    if (!dir || !dir[0]) dir = "/tmp/mess_sw_bw";
+    mkdir(dir, 0777);
+    char path[512];
+    snprintf(path, sizeof(path), "%s/tg_%d.cnt", dir, (int)getpid());
+    int fd = open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if (fd < 0) return;
+    if (ftruncate(fd, sizeof(mess_sw_counter_t)) == 0) {
+        void *p = mmap(NULL, sizeof(mess_sw_counter_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (p != MAP_FAILED) mess_sw = (mess_sw_counter_t *)p;
+    }
+    close(fd);
+}
+#endif
+
 #ifndef MAP_HUGE_SHIFT
 #define MAP_HUGE_SHIFT 26
 #endif
@@ -196,10 +217,24 @@ int main(int argc, char* argv[]) {
         }
     }
 
+#ifdef __APPLE__
+    long long rd_per_iter = 0, wr_per_iter = 0;
+    TrafficGen_get_rw_bytes_per_iter(rd_percentage, &rd_per_iter, &wr_per_iter);
+    long long iters_per_pass = (array_elements + loop_increment - 1) / loop_increment;
+    unsigned long long rd_per_pass = (unsigned long long)(rd_per_iter * iters_per_pass);
+    unsigned long long wr_per_pass = (unsigned long long)(wr_per_iter * iters_per_pass);
+    mess_sw_counter_init();
+    if (verbose) fprintf(stderr, "sw-bw: %llu rd + %llu wr bytes per pass\n", rd_per_pass, wr_per_pass);
+#endif
+
     for (;;) {
-        {
-            TrafficGen_copy_rw(a, b, &array_elements, &pause, rd_percentage);
+        TrafficGen_copy_rw(a, b, &array_elements, &pause, rd_percentage);
+#ifdef __APPLE__
+        if (mess_sw) {
+            atomic_fetch_add_explicit(&mess_sw->rd_bytes, rd_per_pass, memory_order_relaxed);
+            atomic_fetch_add_explicit(&mess_sw->wr_bytes, wr_per_pass, memory_order_relaxed);
         }
+#endif
     }
 
     release_array(a, array_bytes, a_via_mmap);
