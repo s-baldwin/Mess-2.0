@@ -11,7 +11,7 @@ Tested on an M3 Pro, macOS 26.6.2, Apple clang 21.0.0, upstream MESS commit `132
 **Option A: clone the fork**
 
 ```bash
-git clone <FORK_URL> Mess-2.0
+git clone https://github.com/s-baldwin/Mess-2.0.git Mess-2.0
 cd Mess-2.0
 git checkout macos-port
 ```

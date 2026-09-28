@@ -10,3 +10,4 @@ sw_bw_probe.py
 ioreport_probe
 ioreport_probe.c
 ioreport_all.txt
+port_test_logs/
