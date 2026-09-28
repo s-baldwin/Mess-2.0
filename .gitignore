@@ -7,3 +7,6 @@ src/traffic_gen/src/utils.c
 src/traffic_gen/build/
 ioreport_probe.c
 sw_bw_probe.py
+ioreport_probe
+ioreport_probe.c
+ioreport_all.txt
