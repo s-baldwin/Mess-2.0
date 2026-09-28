@@ -987,7 +987,11 @@ bool numa_nodes_target_cxl_or_pmem(const std::map<int, NumaNodeMemoryInfo>& numa
 
 
 uint64_t calculate_traffic_gen_array_size(uint64_t l3_size_bytes) {
-    // TODO: This might need improving to ensure a minimum size, like we used to do with the previous formula
+    // macOS port: allow an explicit override because macOS does not report the SLC/LLC via sysctl
+    if (const char* mb = std::getenv("MESS_TRAFFICGEN_ARRAY_MB")) {
+        uint64_t v = std::strtoull(mb, nullptr, 10);
+        if (v > 0) return (v * 1000ULL * 1000ULL) / sizeof(double);
+    }
     return (l3_size_bytes * 4) / sizeof(double);
 }
 
