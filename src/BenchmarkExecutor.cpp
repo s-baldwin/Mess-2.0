@@ -2021,6 +2021,17 @@ double BenchmarkExecutor::calculate_latency_from_perf_values(double cycles, doub
     if (interval_duration <= 0.0 || accesses <= 0.0) {
         return 0.0;
     }
+
+#ifdef __APPLE__
+    // macOS port: ptr_chase has no cycle counter (no perf_event_open), so cycles is always 0.
+    // Fall back to the wall-clock burst duration measured by ptr_chase with clock_gettime.
+    // TLB-miss counters are unavailable as well, so no page-walk correction is applied here.
+    if (cycles <= 0.0) {
+        (void)tlb1miss;
+        (void)tlb2miss;
+        return (interval_duration * 1e9) / accesses;
+    }
+#endif
     
     // Measured frequency from cycles/time. This is the most accurate when valid,
     // but on some systems (e.g. NVIDIA Grace) cycles/duration does not track the
