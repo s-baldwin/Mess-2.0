@@ -516,6 +516,15 @@ int system_info_detect(system_info *out) {
     len = sizeof(mem_bytes);
     sysctlbyname("hw.memsize", &mem_bytes, &len, NULL, 0);
     out->total_mem_bytes = mem_bytes;
+
+    // macOS port: macOS exposes no socket topology. Describe the SoC as a single socket so code
+    // that indexes sockets[0] (default traffic-gen core count, --total-cores validation) works.
+    out->socket_count = 1;
+    out->sockets[0].id = 0;
+    out->sockets[0].core_count = physical_cores;
+    out->sockets[0].thread_count = logical_cores;
+    out->sockets[0].cache_count = 0;
+    out->sockets[0].mem_total_bytes = static_cast<long long>(mem_bytes);
     
     std::snprintf(out->mem_technology, sizeof(out->mem_technology), "LPDDR5");
     
