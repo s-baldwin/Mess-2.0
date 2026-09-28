@@ -77,6 +77,8 @@ struct CpuTopology {
 std::map<int, CpuTopology> get_cpu_topology();
 std::map<int, std::set<int>> get_socket_to_nodes_map(const std::map<int, CpuTopology>& topo);
 std::filesystem::path get_project_root();
+/** @brief Absolute path of the running executable (/proc/self/exe on Linux, _NSGetExecutablePath on macOS). */
+std::filesystem::path get_executable_path(std::error_code& ec);
 
 bool numa_node_has_memory(int node);
 std::vector<int> get_allowed_cpus();

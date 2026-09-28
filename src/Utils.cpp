@@ -40,6 +40,10 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/file.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#include <climits>
+#endif
 #include <fcntl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -249,9 +253,24 @@ int get_numa_node_of_cpu(int cpu) {
     return node >= 0 ? node : 0;
 }
 
+std::filesystem::path get_executable_path(std::error_code& ec) {
+#ifdef __APPLE__
+    // macOS port: there is no /proc; ask dyld for the executable path.
+    char buf[PATH_MAX];
+    uint32_t size = sizeof(buf);
+    if (_NSGetExecutablePath(buf, &size) != 0) {
+        ec = std::make_error_code(std::errc::filename_too_long);
+        return {};
+    }
+    return std::filesystem::canonical(buf, ec);
+#else
+    return std::filesystem::canonical("/proc/self/exe", ec);
+#endif
+}
+
 std::filesystem::path get_project_root() {
     std::error_code ec;
-    std::filesystem::path exe_path = std::filesystem::canonical("/proc/self/exe", ec);
+    std::filesystem::path exe_path = get_executable_path(ec);
     if (ec) {
         return std::filesystem::current_path();
     }

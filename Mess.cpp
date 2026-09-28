@@ -135,10 +135,10 @@ struct KernelBinaryCheckResult {
 KernelBinaryCheckResult validate_runtime_binaries() {
     KernelBinaryCheckResult result;
     std::error_code ec;
-    const std::filesystem::path exe_path = std::filesystem::canonical("/proc/self/exe", ec);
+    const std::filesystem::path exe_path = get_executable_path(ec);
     if (ec) {
         result.ok = false;
-        result.error_message = "ERROR: Could not determine executable path at /proc/self/exe.";
+        result.error_message = "ERROR: Could not determine executable path.";
         return result;
     }
 
