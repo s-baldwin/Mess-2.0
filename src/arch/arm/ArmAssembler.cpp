@@ -516,7 +516,8 @@ std::string ArmAssembler::getPointerChaseLoopAsm() const {
 }
 
 std::string ArmAssembler::getPointerChaseInstruction() const {
-    return "        \"adds x3, %2, %1; ldr %1, [x3];\"";
+    // Newline-separated: Apple's arm64 assembler treats ';' as a comment, not a separator.
+    return "        \"adds x3, %2, %1\\n\\tldr %1, [x3]\\n\\t\"";
 }
 
 std::string ArmAssembler::generatePointerChaseBurstLoop() const {
@@ -526,10 +527,10 @@ std::string ArmAssembler::generatePointerChaseBurstLoop() const {
         register uint64_t next asm("x2") = current_offset;
 
         __asm__ __volatile__ (
-            "start_loop_%=:"
+            "start_loop_%=:\n\t"
             #include "loop.h"
-            "subs %0, %0, #1;"
-            "bne start_loop_%=;"
+            "subs %0, %0, #1\n\t"
+            "bne start_loop_%=\n\t"
             : "+r" (i), "+r" (next)
             : "r" (start)
             : "x3", "cc", "memory"
