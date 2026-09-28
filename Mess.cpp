@@ -109,6 +109,13 @@ struct PerfAccessProbeResult {
 
 PerfAccessProbeResult probe_perf_access() {
     PerfAccessProbeResult result;
+#ifdef __APPLE__
+    // macOS port: there is no perf. Bandwidth comes from MacBandwidthMeasurer (software byte
+    // counters), and TLB latency is a fixed placeholder (see measure_and_set_tlb_latency).
+    result.paranoid_level = -1;
+    result.perf_accessible = true;
+    return result;
+#endif
     std::ifstream paranoid_file("/proc/sys/kernel/perf_event_paranoid");
     if (paranoid_file.is_open()) {
         paranoid_file >> result.paranoid_level;

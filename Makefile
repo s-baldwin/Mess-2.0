@@ -83,6 +83,7 @@ SRCS = Mess.cpp \
        src/measurement/bw_measurers/LikwidBandwidthMeasurer.cpp \
        src/measurement/bw_measurers/VtuneBandwidthMeasurer.cpp \
        src/measurement/bw_measurers/PcmBandwidthMeasurer.cpp \
+       src/measurement/bw_measurers/MacBandwidthMeasurer.cpp \
        src/process/TrafficGenProcessManager.cpp \
        src/process/PtrchaseProcessManager.cpp \
        src/utils/ProgressTracker.cpp \
@@ -201,6 +202,7 @@ MESS_PROFILER_OBJS = src/SystemDetection.o \
                      src/measurement/bw_measurers/LikwidBandwidthMeasurer.o \
                      src/measurement/bw_measurers/VtuneBandwidthMeasurer.o \
                      src/measurement/bw_measurers/PcmBandwidthMeasurer.o \
+                     src/measurement/bw_measurers/MacBandwidthMeasurer.o \
                      src/measurement/MeasurementStorage.o \
                      src/process/TrafficGenProcessManager.o \
                      src/profiler/ProcessBinding.o \

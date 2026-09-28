@@ -36,6 +36,7 @@
 #include "measurement/bw_measurers/LikwidBandwidthMeasurer.h"
 #include "measurement/bw_measurers/PcmBandwidthMeasurer.h"
 #include "measurement/bw_measurers/VtuneBandwidthMeasurer.h"
+#include "measurement/bw_measurers/MacBandwidthMeasurer.h"
 #include "architecture/BandwidthCounterStrategy.h"
 #include <iostream>
 
@@ -49,6 +50,21 @@ std::unique_ptr<BandwidthMeasurer> create_bandwidth_measurer(
     ExecutionMode mode) {
 
     static bool printed_measurer_type = false;
+
+#ifdef __APPLE__
+    // macOS port: no perf/likwid/pcm/vtune; use traffic-generator software byte counters.
+    {
+        (void)mode;
+        if (config.verbosity >= 1 && !printed_measurer_type) {
+            std::cout << "Using macOS software byte-counter Bandwidth Measurer" << std::endl;
+            printed_measurer_type = true;
+        }
+        std::unique_ptr<BandwidthMeasurer> mac_measurer = std::make_unique<MacBandwidthMeasurer>(
+            config, sys_info, caps, storage, traffic_gen_manager, numa_resolver, mode);
+        mac_measurer->set_counter_selection(BandwidthCounterStrategy::instance().get_selection());
+        return mac_measurer;
+    }
+#endif
 
     auto& strategy = BandwidthCounterStrategy::instance();
     MeasurerType measurer_type = strategy.get_resolved_measurer_type();
